@@ -1,10 +1,10 @@
-from life_dashboard import settings
-import os
 import importlib
 import logging
+import os
 
-from life_dashboard.settings import HOME_PLUGIN_NAME
 from kivy.lang import Builder
+
+from life_dashboard import settings
 
 logger = logging.getLogger(__name__)
 PLUGIN_ENV_VAR_PREFIX = 'LIFE_DASHBOARD_PLUGIN_'
@@ -21,7 +21,7 @@ class PluginBase:
 
     Initialization order:
     * Importing a module, getting a `Plugin` class, instantiating.
-    * Injecting name and config variables.
+    * Injecting name, config variables, settings etc.
     * Calling `on_import`
     * Loading `kv_files`
     * Calling `on_load`
@@ -38,6 +38,7 @@ class PluginBase:
     config = {}
     name = None
     root_directory = None
+    settings = None
 
     def before_load(self):
         """
@@ -81,8 +82,11 @@ def _load_plugin(name, path, config_env_prefix):
         plugin_instance = plugin_cls()
         plugin_instance.name = name
         plugin_instance.config = config
+        plugin_instance.settings = settings
         plugin_instance.root_directory = os.path.dirname(module.__file__)
-        plugin_instance.before_load()
+
+        if hasattr(plugin_instance, 'before_load'):
+            plugin_instance.before_load()
     except Exception:
         logger.exception(
             'Failed to initialize plugin %s %s',
@@ -100,7 +104,7 @@ def load_plugins():
     """
 
     plugins = {}
-    os.environ[f'{PLUGIN_ENV_VAR_PREFIX}{HOME_PLUGIN_NAME}'] = 'life_dashboard.plugins.home'
+    os.environ[f'{PLUGIN_ENV_VAR_PREFIX}{settings.HOME_PLUGIN_NAME}'] = 'life_dashboard.plugins.home'
 
     for key, path in os.environ.items():
         if not key.startswith(PLUGIN_ENV_VAR_PREFIX):
@@ -117,7 +121,8 @@ def load_plugins():
 def after_load_plugins(plugins):
     for name, plugin in plugins.items():
         try:
-            plugin.on_load()
+            if hasattr(plugin, 'on_load'):
+                plugin.on_load()
         except Exception:
             logger.exception('Failed to load plugin %s', name)
             raise PluginInitError()
@@ -125,7 +130,7 @@ def after_load_plugins(plugins):
 
 def load_plugin_kv_files(plugins):
     for name, plugin in plugins.items():
-        for filename in plugin.kv_files:
+        for filename in getattr(plugin, 'kv_files', []):
             path = os.path.join(plugin.root_directory, filename)
 
             try:
@@ -142,7 +147,8 @@ def load_plugin_kv_files(plugins):
 def load_plugin_screens(plugins):
     for name, plugin in plugins.items():
         try:
-            plugin.load_screens()
+            if hasattr(plugin, 'load_screens'):
+                plugin.load_screens()
         except Exception:
             logger.exception('Failed to load screens for plugin %s', name)
             raise PluginInitError()

@@ -1,9 +1,10 @@
-from ..base import PluginBase
 from kivy.uix.screenmanager import Screen
+
+from ..base import PluginBase
 
 
 class HomeScreen(Screen):
-    pass#name = 'home'
+    pass
 
 
 class Plugin(PluginBase):
@@ -11,17 +12,6 @@ class Plugin(PluginBase):
         'uix/home_screen.kv',
     ]
     screens = []
-
-    def on_import(self, name):
-        """
-        Called right after the class is imported.
-        """
-
-    def on_load(self):
-        """
-        Called when all plugins are imported already,
-        it's just another round of initialization.
-        """
 
     def load_screens(self):
         home_screen = HomeScreen()

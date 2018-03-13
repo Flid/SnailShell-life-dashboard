@@ -1,9 +1,13 @@
-import os
-
 from kivy.app import App
-from kivy.uix.screenmanager import ScreenManager
 from kivy.logger import Logger as log
-from life_dashboard.plugins.base import load_plugins, load_plugin_kv_files, after_load_plugins, load_plugin_screens
+from kivy.uix.screenmanager import ScreenManager
+
+from life_dashboard.plugins.base import (
+    after_load_plugins,
+    load_plugin_kv_files,
+    load_plugin_screens,
+    load_plugins
+)
 from life_dashboard.settings import HOME_PLUGIN_NAME
 
 
@@ -21,14 +25,15 @@ class LifeDashboardApp(App):
 
     def _register_screens(self, manager):
         for plugin in self.plugins.values():
-            for screen in plugin.screens:
+            for screen in getattr(plugin, 'screens', []):
                 self.screens[screen.name] = screen
                 manager.add_widget(screen)
 
     def build(self):
-        self.sm = ScreenManager()
+        import pdb; pdb.set_trace()
+        #self.sm = ScreenManager()
 
-        load_plugin_screens(self.plugins)
+        #load_plugin_screens(self.plugins)
 
         self._register_screens(self.sm)
         self.sm.current = self.home_plugin.root_screen_name
