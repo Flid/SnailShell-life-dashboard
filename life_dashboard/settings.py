@@ -4,17 +4,21 @@ MASTER_HOST = os.environ['MASTER_HOST']
 RABBITMQ_USER = os.environ['RABBITMQ_USER']
 RABBITMQ_PASSWORD = os.environ['RABBITMQ_PASSWORD']
 RABBITMQ_PORT = int(os.environ['RABBITMQ_PORT'])
-
+RABBTMQ_DSN = f'amqp://{RABBITMQ_USER}:{RABBITMQ_PASSWORD}@{MASTER_HOST}:{RABBITMQ_PORT}/'
 
 PLUGIN_ENV_VAR_PREFIX = 'LIFE_DASHBOARD_PLUGIN_'
 
 HOME_PLUGIN_NAME = 'home'
 COMMANDS_LISTENER_PLUGIN_NAME = 'commans_listener'
+PHOTO_CAPTURE_PLUGIN_NAME = 'photo_capture'
 
 DEFAULT_PLUGINS = {
     HOME_PLUGIN_NAME.upper(): 'life_dashboard.plugins.home',
     COMMANDS_LISTENER_PLUGIN_NAME.upper(): 'life_dashboard.plugins.commands_listener',
+    PHOTO_CAPTURE_PLUGIN_NAME.upper(): 'life_dashboard.plugins.photo_capture',
 }
+PHOTO_CAPTURE_QUEUE_NAME = 'snailshell_mirror_photos'
+PHOTO_CAPTURE_QUEUE_TTL = 3
 
 KIVY_BORDERLESS = int(os.environ.get('KIVY_BORDERLESS', 1))
 KIVY_FULLSCREEN = int(os.environ.get('KIVY_FULLSCREEN', 0))

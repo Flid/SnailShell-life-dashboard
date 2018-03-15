@@ -6,6 +6,8 @@ from kivy.logger import Logger as log
 from kombu import Connection, Exchange, Queue
 from kombu.mixins import ConsumerMixin
 
+from life_dashboard import settings
+
 from ..base import PluginBase
 
 
@@ -48,13 +50,7 @@ class Worker(ConsumerMixin):
 
 class Plugin(PluginBase):
     def after_load(self):
-        rabbit_url = (
-            f'amqp://{self.settings.RABBITMQ_USER}:'
-            f'{self.settings.RABBITMQ_PASSWORD}@'
-            f'{self.settings.MASTER_HOST}:'
-            f'{self.settings.RABBITMQ_PORT}/'
-        )
-        conn = Connection(rabbit_url, heartbeat=10)
+        conn = Connection(settings.RABBTMQ_DSN, heartbeat=10)
         worker = Worker(conn)
 
         self._worker_thread = Thread(target=worker.run)

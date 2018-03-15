@@ -1,4 +1,4 @@
-FROM arm32v7/python:3.5-jessie
+FROM arm32v7/python:3.6-jessie
 MAINTAINER "Anton Kirilenko" <antony.kirilenko@gmail.com>
 
 ENV QEMU_EXECVE 1
