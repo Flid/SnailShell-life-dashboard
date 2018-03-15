@@ -17,6 +17,11 @@ RUN mkdir -p $STATIC_ROOT && chown $RUN_USER:$RUN_USER $STATIC_ROOT -R
 # Requirements are installed in a parent image.
 # It takes very long time to build in QEMU, so we explicitely cache it this way.
 
+# TODO
+RUN apt install -y libraspberrypi0 libraspberrypi-dev libraspberrypi-doc libraspberrypi-bin
+ENV READTHEDOCS True
+RUN pip install picamera
+
 COPY . $ROOT
 WORKDIR $ROOT
 

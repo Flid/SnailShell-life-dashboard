@@ -3,4 +3,4 @@ kivy==1.10.0
 # kivy==1.10.0 - will be installed in a dockerfile
 kombu==4.1.0
 numpy==1.14.2
-opencv-python==3.4.0.12
+# opencv-python==3.4.0.12 - for local debug

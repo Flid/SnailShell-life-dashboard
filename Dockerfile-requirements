@@ -25,4 +25,7 @@ RUN pip3 install kivy==1.10.0
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt --no-cache-dir
 
+# It's only for RPi:
+RUN pip install picamera==1.13
+
 RUN ["cross-build-end"]
