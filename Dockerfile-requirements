@@ -1,4 +1,4 @@
-FROM arm32v7/python:3.6-jessie
+FROM arm32v7/python:3.5-jessie
 MAINTAINER "Anton Kirilenko" <antony.kirilenko@gmail.com>
 
 ENV QEMU_EXECVE 1
@@ -19,9 +19,8 @@ RUN apt-get update && apt-get install -y \
     libavcodec-dev \
     zlib1g-dev
 
-RUN pip3 install Cython==0.25
-RUN pip3 install kivy==1.10.1
-
+RUN pip3 install Cython==0.25.2
+RUN pip3 install kivy==1.10.0
 
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt --no-cache-dir

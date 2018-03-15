@@ -5,9 +5,9 @@ import os
 from kivy.lang import Builder
 
 from life_dashboard import settings
+from life_dashboard.settings import DEFAULT_PLUGINS, PLUGIN_ENV_VAR_PREFIX
 
 logger = logging.getLogger(__name__)
-PLUGIN_ENV_VAR_PREFIX = 'LIFE_DASHBOARD_PLUGIN_'
 
 
 class PluginInitError(Exception):
@@ -103,8 +103,10 @@ def load_plugins():
     Load plugins, based on a list of modules from settings.
     """
 
+    for name, module_path in DEFAULT_PLUGINS.items():
+        os.environ[f'{PLUGIN_ENV_VAR_PREFIX}{name}'] = module_path
+
     plugins = {}
-    os.environ[f'{PLUGIN_ENV_VAR_PREFIX}{settings.HOME_PLUGIN_NAME}'] = 'life_dashboard.plugins.home'
 
     for key, path in os.environ.items():
         if not key.startswith(PLUGIN_ENV_VAR_PREFIX):
@@ -121,8 +123,8 @@ def load_plugins():
 def after_load_plugins(plugins):
     for name, plugin in plugins.items():
         try:
-            if hasattr(plugin, 'on_load'):
-                plugin.on_load()
+            if hasattr(plugin, 'after_load'):
+                plugin.after_load()
         except Exception:
             logger.exception('Failed to load plugin %s', name)
             raise PluginInitError()

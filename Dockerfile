@@ -24,4 +24,4 @@ RUN ["cross-build-end"]
 
 USER $RUN_USER
 
-CMD ["./run.sh"]
+CMD ["./run_app.py"]

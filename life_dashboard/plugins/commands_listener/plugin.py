@@ -1,61 +1,62 @@
-#from kombu import Connection, Exchange, Queue, Consumer
-import socket
+import json
+from threading import Thread
 
 from kivy.app import App
+from kivy.logger import Logger as log
+from kombu import Connection, Exchange, Queue
+from kombu.mixins import ConsumerMixin
 
 from ..base import PluginBase
 
 
+class Worker(ConsumerMixin):
+    task_queue = Queue('tasks', Exchange('tasks'), 'tasks')
+
+    def __init__(self, connection):
+        self.connection = connection
+
+    def get_consumers(self, Consumer, channel):
+        return [
+            Consumer(
+                queues=[self.task_queue],
+                callbacks=[self.on_task],
+            ),
+        ]
+
+    def on_task(self, body, message):
+        try:
+            log.info('Got task: {0!r}'.format(body))
+
+            body = json.loads(body)
+
+            command = body['command']
+
+            if command == 'set_screen':
+                App.get_running_app().sm.current = body['screen_name']
+            else:
+                raise ValueError('Unknown command %s', command)
+        except Exception:
+            log.exception('Error while processing request')
+            return
+
+        finally:
+            # Even in case of an error we call `ack`. The message is incorrect,
+            #  not the consumer. There's a very low chance it will
+            # be processed next time.
+            message.ack()
+
+
 class Plugin(PluginBase):
     def after_load(self):
-        return
         rabbit_url = (
             f'amqp://{self.settings.RABBITMQ_USER}:'
             f'{self.settings.RABBITMQ_PASSWORD}@'
             f'{self.settings.MASTER_HOST}:'
             f'{self.settings.RABBITMQ_PORT}/'
         )
-        self._conn = Connection(rabbit_url, heartbeat=10)
+        conn = Connection(rabbit_url, heartbeat=10)
+        worker = Worker(conn)
 
-        exchange = Exchange('example-exchange', type='direct')
-        queue = Queue(
-            name='example-queue', exchange=exchange,
-            routing_key='BOB',
-        )
-
-        self._consumer = Consumer(
-            self._conn,
-            queues=queue,
-            callbacks=[self._process_message],
-            accept=['text/plain'],
-        )
-        self._consumer.consume()
-
-        self.run()
-
-    def _process_message(self, body, message):
-        print('The body is {}'.format(body))
-        message.ack()
-
-    def _establish_connection(self):
-        revived_connection = self._conn.clone()
-        revived_connection.ensure_connection(max_retries=3)
-        channel = revived_connection.channel()
-        self._consumer.revive(channel)
-        self._consumer.consume()
-        return revived_connection
-
-    def consume(self):
-        new_conn = self._establish_connection()
-        while True:
-            try:
-                new_conn.drain_events(timeout=2)
-            except socket.timeout:
-                new_conn.heartbeat_check()
-
-    def run(self):
-        while True:
-            try:
-                self._consume()
-            except self._conn.connection_errors:
-                print('connection revived')
+        self._worker_thread = Thread(target=worker.run)
+        self._worker_thread.daemon = True
+        self._worker_thread.start()
