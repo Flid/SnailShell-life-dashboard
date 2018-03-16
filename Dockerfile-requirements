@@ -1,4 +1,5 @@
-FROM arm32v7/python:3.6-jessie
+#FROM arm32v7/python:3.6-jessie
+FROM raspbian/jessie
 MAINTAINER "Anton Kirilenko" <antony.kirilenko@gmail.com>
 
 ENV QEMU_EXECVE 1
@@ -19,13 +20,40 @@ RUN apt-get update && apt-get install -y \
     libavcodec-dev \
     zlib1g-dev
 
-RUN pip3 install Cython==0.25.2
-RUN pip3 install kivy==1.10.0
+
+# Installing python 3.6
+RUN apt-get install -y tk-dev libncurses5-dev libncursesw5-dev \
+    libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev \
+    libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev
+
+RUN wget https://www.python.org/ftp/python/3.6.4/Python-3.6.4.tar.xz
+RUN tar xf Python-3.6.4.tar.xz
+RUN cd Python-3.6.4 && ./configure && make -j `grep -c ^processor /proc/cpuinfo` && make altinstall
+RUN cd ..
+RUN rm -rf Python-3.6.4 && rm -f Python-3.6.4.tar.xz
+
+
+RUN pip3.6 install Cython==0.25.2
+#TODO
+RUN apt install -y git
+RUN pip3.6 install kivy==1.10.0
 
 COPY requirements.txt /tmp/requirements.txt
-RUN pip install -r /tmp/requirements.txt --no-cache-dir
+RUN pip3.6 install -r /tmp/requirements.txt --no-cache-dir
 
-# It's only for RPi:
-RUN pip install picamera==1.13
+ENV READTHEDOCS True
+RUN pip3.6 install picamera==1.13
+
+RUN apt-get install --reinstall -y libraspberrypi-bin libraspberrypi-dev libraspberrypi-doc libraspberrypi0
+
+RUN apt install -y libmtdev1
+#RUN apt-get --purge -y remove build-essential tk-dev \
+#    libncurses5-dev libncursesw5-dev libreadline6-dev \
+#    libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev \
+#    libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev git
+
+#RUN apt-get autoremove -y && apt-get clean -y
+
+
 
 RUN ["cross-build-end"]

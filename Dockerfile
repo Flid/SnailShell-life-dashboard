@@ -14,13 +14,12 @@ RUN ["cross-build-start"]
 RUN groupadd $RUN_USER && useradd -m -g $RUN_USER $RUN_USER
 RUN mkdir -p $STATIC_ROOT && chown $RUN_USER:$RUN_USER $STATIC_ROOT -R
 
+ENV XDG_RUNTIME_DIR=/run/user/1000
+ENV DISPLAY=':0'
+RUN usermod -a -G video $RUN_USER
+
 # Requirements are installed in a parent image.
 # It takes very long time to build in QEMU, so we explicitely cache it this way.
-
-# TODO
-RUN apt install -y libraspberrypi0 libraspberrypi-dev libraspberrypi-doc libraspberrypi-bin
-ENV READTHEDOCS True
-RUN pip install picamera
 
 COPY . $ROOT
 WORKDIR $ROOT
@@ -29,4 +28,4 @@ RUN ["cross-build-end"]
 
 USER $RUN_USER
 
-CMD ["./run_app.py"]
+CMD ["python3.6", "./run_app.py"]
