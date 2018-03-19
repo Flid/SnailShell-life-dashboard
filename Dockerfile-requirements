@@ -8,6 +8,8 @@ COPY qemu/cross-build-end qemu/cross-build-start qemu/qemu-arm-static qemu/sh-sh
 
 RUN ["cross-build-start"]
 
+#WORKDIR /tmp/
+
 RUN apt-get update && apt-get install -y \
     build-essential \
     libsdl2-dev \
@@ -42,18 +44,41 @@ COPY requirements.txt /tmp/requirements.txt
 RUN pip3.6 install -r /tmp/requirements.txt --no-cache-dir
 
 ENV READTHEDOCS True
-RUN pip3.6 install picamera==1.13
+RUN pip3.6 install 'picamera[array]==1.13'
 
 RUN apt-get install --reinstall -y libraspberrypi-bin libraspberrypi-dev libraspberrypi-doc libraspberrypi0
 
 RUN apt install -y libmtdev1
-#RUN apt-get --purge -y remove build-essential tk-dev \
-#    libncurses5-dev libncursesw5-dev libreadline6-dev \
-#    libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev \
-#    libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev git
 
-#RUN apt-get autoremove -y && apt-get clean -y
+#RUN apt install -y libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev
 
 
 
+
+
+#RUN apt install -y libatlas-base-dev gfortran
+
+#RUN pip3.6 install opencv-python==3.4.0.12
+#RUN apt install -y unzip cmake
+
+
+
+#RUN wget -q https://github.com/opencv/opencv/archive/3.4.1.zip
+
+#RUN unzip 3.4.1.zip
+
+#RUN wget -q https://github.com/opencv/opencv_contrib/archive/master.zip
+#RUN unzip master.zip
+
+#RUN mkdir opencv-3.4.1/build/
+#RUN cd opencv-3.4.1/build/ && cmake -D CMAKE_BUILD_TYPE=RELEASE \
+#    -D CMAKE_INSTALL_PREFIX=/usr/local \
+#    -D PYTHON_DEFAULT_EXECUTABLE=python3.6 \
+#    -D PYTHON_EXECUTABLE=python3.6 \
+#    -D OPENCV_EXTRA_MODULES_PATH=/tmp/opencv_contrib-master/modules \
+#    /tmp/opencv-3.4.1
+
+#RUN cd opencv-3.4.1/build/ && make -j `grep -c ^processor /proc/cpuinfo`
+
+RUN rm -rf /tmp/*
 RUN ["cross-build-end"]
