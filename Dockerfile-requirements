@@ -1,4 +1,3 @@
-#FROM arm32v7/python:3.6-jessie
 FROM raspbian/jessie
 MAINTAINER "Anton Kirilenko" <antony.kirilenko@gmail.com>
 
@@ -7,6 +6,8 @@ ENV QEMU_EXECVE 1
 COPY qemu/cross-build-end qemu/cross-build-start qemu/qemu-arm-static qemu/sh-shim /usr/bin/
 
 RUN ["cross-build-start"]
+
+WORKDIR /tmp/
 
 RUN apt-get update && apt-get install -y build-essential libsdl2-dev \
     libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev \
@@ -27,7 +28,11 @@ RUN pip3.6 install cython==0.25.2 --no-cache-dir
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3.6 install -r /tmp/requirements.txt --no-cache-dir
 
+
+
+RUN apt remove -y `apt list --installed | grep '\-dev/' | cut -d'/' -f1`
+RUN rm -rf /tmp/*
+
 #RUN apt-get install --reinstall -y libraspberrypi-bin libraspberrypi-dev libraspberrypi-doc libraspberrypi0
 
-RUN rm -rf /tmp/*
 RUN ["cross-build-end"]
