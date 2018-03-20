@@ -19,7 +19,7 @@ class RPiCamera(object):
         if preview:
             self._cap.start_preview()
         self._raw_capture = PiRGBArray(self._cap)
-        time.sleep(0.1)  # Let it stabilize
+        time.sleep(0.2)  # Let it stabilize
 
     def get_frame(self, f='rgb'):
         self._raw_capture.truncate(0)
